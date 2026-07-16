@@ -1,293 +1,249 @@
 /**
-* Template Name: Gp
-* Updated: Sep 18 2023 with Bootstrap v5.3.2
-* Template URL: https://bootstrapmade.com/gp-free-multipurpose-html-bootstrap-template/
-* Author: BootstrapMade.com
-* License: https://bootstrapmade.com/license/
+* Mayi Pty Ltd — Main JS
 */
-(function() {
+(function () {
   "use strict";
 
-  /**
-   * Easy selector helper function
-   */
+  /* -------------------------------------------------------
+   * Helpers
+   * ----------------------------------------------------- */
   const select = (el, all = false) => {
-    el = el.trim()
-    if (all) {
-      return [...document.querySelectorAll(el)]
-    } else {
-      return document.querySelector(el)
-    }
-  }
+    el = el.trim();
+    return all ? [...document.querySelectorAll(el)] : document.querySelector(el);
+  };
 
-  /**
-   * Easy event listener function
-   */
   const on = (type, el, listener, all = false) => {
-    let selectEl = select(el, all)
-    if (selectEl) {
-      if (all) {
-        selectEl.forEach(e => e.addEventListener(type, listener))
-      } else {
-        selectEl.addEventListener(type, listener)
-      }
+    const target = select(el, all);
+    if (!target) return;
+    if (all) {
+      target.forEach(e => e.addEventListener(type, listener));
+    } else {
+      target.addEventListener(type, listener);
     }
-  }
+  };
 
-  /**
-   * Easy on scroll event listener 
-   */
-  const onscroll = (el, listener) => {
-    el.addEventListener('scroll', listener)
-  }
+  const onscroll = (el, listener) => el.addEventListener('scroll', listener);
 
-  /**
-   * Navbar links active state on scroll
-   */
-  let navbarlinks = select('#navbar .scrollto', true)
+  /* -------------------------------------------------------
+   * Navbar active state on scroll
+   * ----------------------------------------------------- */
+  const navbarlinks = select('#navbar .scrollto', true);
   const navbarlinksActive = () => {
-    let position = window.scrollY + 200
-    navbarlinks.forEach(navbarlink => {
-      if (!navbarlink.hash) return
-      let section = select(navbarlink.hash)
-      if (!section) return
-      if (position >= section.offsetTop && position <= (section.offsetTop + section.offsetHeight)) {
-        navbarlink.classList.add('active')
+    const position = window.scrollY + 200;
+    navbarlinks.forEach(link => {
+      if (!link.hash) return;
+      const section = select(link.hash);
+      if (!section) return;
+      if (position >= section.offsetTop && position <= section.offsetTop + section.offsetHeight) {
+        link.classList.add('active');
       } else {
-        navbarlink.classList.remove('active')
+        link.classList.remove('active');
       }
-    })
-  }
-  window.addEventListener('load', navbarlinksActive)
-  onscroll(document, navbarlinksActive)
+    });
+  };
+  window.addEventListener('load', navbarlinksActive);
+  onscroll(document, navbarlinksActive);
 
-  /**
-   * Scrolls to an element with header offset
-   */
+  /* -------------------------------------------------------
+   * Scroll with header offset
+   * ----------------------------------------------------- */
   const scrollto = (el) => {
-    let header = select('#header')
-    let offset = header.offsetHeight
+    const header = select('#header');
+    const offset = header ? header.offsetHeight : 0;
+    const target = select(el);
+    if (!target) return;
+    window.scrollTo({ top: target.offsetTop - offset, behavior: 'smooth' });
+  };
 
-    let elementPos = select(el).offsetTop
-    window.scrollTo({
-      top: elementPos - offset,
-      behavior: 'smooth'
-    })
-  }
-
-  /**
-   * Toggle .header-scrolled class to #header when page is scrolled
-   */
-  let selectHeader = select('#header')
+  /* -------------------------------------------------------
+   * Header: add background on scroll
+   * ----------------------------------------------------- */
+  const selectHeader = select('#header');
   if (selectHeader) {
     const headerScrolled = () => {
-      if (window.scrollY > 100) {
-        selectHeader.classList.add('header-scrolled')
-      } else {
-        selectHeader.classList.remove('header-scrolled')
-      }
-    }
-    window.addEventListener('load', headerScrolled)
-    onscroll(document, headerScrolled)
+      selectHeader.classList.toggle('header-scrolled', window.scrollY > 80);
+    };
+    window.addEventListener('load', headerScrolled);
+    onscroll(document, headerScrolled);
   }
 
-  /**
-   * Back to top button
-   */
-  let backtotop = select('.back-to-top')
+  /* -------------------------------------------------------
+   * Back to top
+   * ----------------------------------------------------- */
+  const backtotop = select('.back-to-top');
   if (backtotop) {
     const toggleBacktotop = () => {
-      if (window.scrollY > 100) {
-        backtotop.classList.add('active')
-      } else {
-        backtotop.classList.remove('active')
-      }
-    }
-    window.addEventListener('load', toggleBacktotop)
-    onscroll(document, toggleBacktotop)
+      backtotop.classList.toggle('active', window.scrollY > 100);
+    };
+    window.addEventListener('load', toggleBacktotop);
+    onscroll(document, toggleBacktotop);
   }
 
-  /**
+  /* -------------------------------------------------------
    * Mobile nav toggle
-   */
-  on('click', '.mobile-nav-toggle', function(e) {
-    select('#navbar').classList.toggle('navbar-mobile')
-    this.classList.toggle('bi-list')
-    this.classList.toggle('bi-x')
-  })
+   * ----------------------------------------------------- */
+  on('click', '.mobile-nav-toggle', function () {
+    select('#navbar').classList.toggle('navbar-mobile');
+    this.classList.toggle('bi-list');
+    this.classList.toggle('bi-x');
+  });
 
-  /**
-   * Mobile nav dropdowns activate
-   */
-  on('click', '.navbar .dropdown > a', function(e) {
-    if (select('#navbar').classList.contains('navbar-mobile')) {
-      e.preventDefault()
-      this.nextElementSibling.classList.toggle('dropdown-active')
-    }
-  }, true)
-
-  /**
-   * Scrool with ofset on links with a class name .scrollto
-   */
-  on('click', '.scrollto', function(e) {
+  /* -------------------------------------------------------
+   * Smooth scroll on .scrollto links
+   * ----------------------------------------------------- */
+  on('click', '.scrollto', function (e) {
     if (select(this.hash)) {
-      e.preventDefault()
-
-      let navbar = select('#navbar')
+      e.preventDefault();
+      const navbar = select('#navbar');
       if (navbar.classList.contains('navbar-mobile')) {
-        navbar.classList.remove('navbar-mobile')
-        let navbarToggle = select('.mobile-nav-toggle')
-        navbarToggle.classList.toggle('bi-list')
-        navbarToggle.classList.toggle('bi-x')
+        navbar.classList.remove('navbar-mobile');
+        const toggle = select('.mobile-nav-toggle');
+        toggle.classList.add('bi-list');
+        toggle.classList.remove('bi-x');
       }
-      scrollto(this.hash)
+      scrollto(this.hash);
     }
-  }, true)
+  }, true);
 
-  /**
-   * Scroll with ofset on page load with hash links in the url
-   */
+  /* -------------------------------------------------------
+   * Scroll on page load when URL has hash
+   * ----------------------------------------------------- */
   window.addEventListener('load', () => {
-    if (window.location.hash) {
-      if (select(window.location.hash)) {
-        scrollto(window.location.hash)
-      }
+    if (window.location.hash && select(window.location.hash)) {
+      scrollto(window.location.hash);
     }
   });
 
-  /**
+  /* -------------------------------------------------------
    * Preloader
-   */
-  let preloader = select('#preloader');
+   * ----------------------------------------------------- */
+  const preloader = select('#preloader');
   if (preloader) {
-    window.addEventListener('load', () => {
-      preloader.remove()
-    });
+    window.addEventListener('load', () => preloader.remove());
   }
 
-  /**
-   * Clients Slider
-   */
-  new Swiper('.clients-slider', {
-    speed: 400,
-    loop: true,
-    autoplay: {
-      delay: 5000,
-      disableOnInteraction: false
-    },
-    slidesPerView: 'auto',
-    pagination: {
-      el: '.swiper-pagination',
-      type: 'bullets',
-      clickable: true
-    },
-    breakpoints: {
-      320: {
-        slidesPerView: 2,
-        spaceBetween: 40
-      },
-      480: {
-        slidesPerView: 3,
-        spaceBetween: 60
-      },
-      640: {
-        slidesPerView: 4,
-        spaceBetween: 80
-      },
-      992: {
-        slidesPerView: 6,
-        spaceBetween: 120
-      }
-    }
-  });
-
-  /**
-   * Porfolio isotope and filter
-   */
+  /* -------------------------------------------------------
+   * AOS (scroll animations)
+   * ----------------------------------------------------- */
   window.addEventListener('load', () => {
-    let portfolioContainer = select('.portfolio-container');
-    if (portfolioContainer) {
-      let portfolioIsotope = new Isotope(portfolioContainer, {
-        itemSelector: '.portfolio-item'
-      });
-
-      let portfolioFilters = select('#portfolio-flters li', true);
-
-      on('click', '#portfolio-flters li', function(e) {
-        e.preventDefault();
-        portfolioFilters.forEach(function(el) {
-          el.classList.remove('filter-active');
-        });
-        this.classList.add('filter-active');
-
-        portfolioIsotope.arrange({
-          filter: this.getAttribute('data-filter')
-        });
-        portfolioIsotope.on('arrangeComplete', function() {
-          AOS.refresh()
-        });
-      }, true);
-    }
-
+    AOS.init({ duration: 800, easing: 'ease-in-out', once: true, mirror: false });
   });
 
-  /**
-   * Initiate portfolio lightbox 
-   */
-  const portfolioLightbox = GLightbox({
-    selector: '.portfolio-lightbox'
-  });
-
-  /**
-   * Portfolio details slider
-   */
-  new Swiper('.portfolio-details-slider', {
-    speed: 400,
-    loop: true,
-    autoplay: {
-      delay: 5000,
-      disableOnInteraction: false
-    },
-    pagination: {
-      el: '.swiper-pagination',
-      type: 'bullets',
-      clickable: true
-    }
-  });
-
-  /**
-   * Testimonials slider
-   */
-  new Swiper('.testimonials-slider', {
-    speed: 600,
-    loop: true,
-    autoplay: {
-      delay: 5000,
-      disableOnInteraction: false
-    },
-    slidesPerView: 'auto',
-    pagination: {
-      el: '.swiper-pagination',
-      type: 'bullets',
-      clickable: true
-    }
-  });
-
-  /**
-   * Animation on scroll
-   */
-  window.addEventListener('load', () => {
-    AOS.init({
-      duration: 1000,
-      easing: "ease-in-out",
-      once: true,
-      mirror: false
-    });
-  });
-
-  /**
-   * Initiate Pure Counter 
-   */
+  /* -------------------------------------------------------
+   * PureCounter (stats)
+   * ----------------------------------------------------- */
   new PureCounter();
 
-})()
+  /* -------------------------------------------------------
+   * Footer year
+   * ----------------------------------------------------- */
+  const yearEl = select('#footer-year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  /* -------------------------------------------------------
+   * Email obfuscation — assemble address at runtime
+   * to prevent naive email harvesting bots
+   * ----------------------------------------------------- */
+  window.addEventListener('load', () => {
+    const link = select('#email-link');
+    if (!link) return;
+    const parts = ['contact', String.fromCharCode(64), 'mayi', '.', 'com', '.', 'au'];
+    const email = parts.join('');
+    link.textContent = email;
+    link.href = 'mailto:' + email;
+  });
+
+  /* -------------------------------------------------------
+   * Hero particles canvas animation
+   * ----------------------------------------------------- */
+  (function initParticles() {
+    const canvas = select('#particles-canvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const COUNT = 55;
+    const MAX_DIST = 130;
+    let particles = [];
+    let animId;
+
+    function resize() {
+      canvas.width  = canvas.offsetWidth  || window.innerWidth;
+      canvas.height = canvas.offsetHeight || window.innerHeight;
+    }
+
+    function Particle() {
+      this.reset = function () {
+        this.x  = Math.random() * canvas.width;
+        this.y  = Math.random() * canvas.height;
+        this.vx = (Math.random() - 0.5) * 0.45;
+        this.vy = (Math.random() - 0.5) * 0.45;
+        this.r  = Math.random() * 1.8 + 0.8;
+      };
+      this.reset();
+    }
+
+    Particle.prototype.update = function () {
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.x < 0 || this.x > canvas.width)  this.vx *= -1;
+      if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+    };
+
+    Particle.prototype.draw = function () {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.7)';
+      ctx.fill();
+    };
+
+    function init() {
+      resize();
+      particles = Array.from({ length: COUNT }, () => new Particle());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx   = particles[i].x - particles[j].x;
+          const dy   = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < MAX_DIST) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(56, 189, 248, ${(1 - dist / MAX_DIST) * 0.25})`;
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
+          }
+        }
+      }
+      animId = requestAnimationFrame(animate);
+    }
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        resize();
+        particles.forEach(p => p.reset());
+      }, 200);
+    });
+
+    // Pause particles when tab is hidden (save battery/CPU)
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        cancelAnimationFrame(animId);
+      } else {
+        animate();
+      }
+    });
+
+    init();
+    animate();
+  }());
+
+}());
