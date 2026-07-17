@@ -1,41 +1,59 @@
 <?php
-  /**
-  * Requires the "PHP Email Form" library
-  * The "PHP Email Form" library is available only in the pro version of the template
-  * The library should be uploaded to: vendor/php-email-form/php-email-form.php
-  * For more info and help: https://bootstrapmade.com/php-email-form/
-  */
+/**
+ * Contact form handler for Mayi Pty Ltd
+ * Requires the "PHP Email Form" library (pro version of BootstrapMade template).
+ * Library path: assets/vendor/php-email-form/php-email-form.php
+ */
 
-  // Replace contact@example.com with your real receiving email address
-  $receiving_email_address = 'mayiptyltd@gmail.com';
+// Only accept POST requests
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    die('Method Not Allowed');
+}
 
-  if( file_exists($php_email_form = '../assets/vendor/php-email-form/php-email-form.php' )) {
-    include( $php_email_form );
-  } else {
-    die( 'Unable to load the "PHP Email Form" Library!');
-  }
+// Load the mailer library
+if (file_exists($php_email_form = '../assets/vendor/php-email-form/php-email-form.php')) {
+    include($php_email_form);
+} else {
+    http_response_code(500);
+    die('Unable to load the "PHP Email Form" library.');
+}
 
-  $contact = new PHP_Email_Form;
-  $contact->ajax = true;
-  
-  $contact->to = $receiving_email_address;
-  $contact->from_name = $_POST['name'];
-  $contact->from_email = $_POST['email'];
-  $contact->subject = $_POST['subject'];
+// Sanitize inputs
+$name    = filter_input(INPUT_POST, 'name',    FILTER_SANITIZE_SPECIAL_CHARS);
+$email   = filter_input(INPUT_POST, 'email',   FILTER_SANITIZE_EMAIL);
+$subject = filter_input(INPUT_POST, 'subject', FILTER_SANITIZE_SPECIAL_CHARS);
+$message = filter_input(INPUT_POST, 'message', FILTER_SANITIZE_SPECIAL_CHARS);
 
-  // Uncomment below code if you want to use SMTP to send emails. You need to enter your correct SMTP credentials
-  /*
-  $contact->smtp = array(
-    'host' => 'example.com',
-    'username' => 'example',
-    'password' => 'pass',
-    'port' => '587'
-  );
-  */
+// Validate required fields
+if (empty($name) || empty($email) || empty($subject) || empty($message)) {
+    http_response_code(400);
+    die('All fields are required.');
+}
 
-  $contact->add_message( $_POST['name'], 'From');
-  $contact->add_message( $_POST['email'], 'Email');
-  $contact->add_message( $_POST['message'], 'Message', 10);
+// Validate email address format
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    http_response_code(400);
+    die('Invalid email address.');
+}
 
-  echo $contact->send();
-?>
+// Enforce maximum lengths (mirrors HTML maxlength attributes)
+if (mb_strlen($name) > 100 || mb_strlen($subject) > 200 || mb_strlen($message) > 5000) {
+    http_response_code(400);
+    die('One or more fields exceed the maximum allowed length.');
+}
+
+$receiving_email_address = 'mayiptyltd@gmail.com';
+
+$contact = new PHP_Email_Form;
+$contact->ajax = true;
+$contact->to         = $receiving_email_address;
+$contact->from_name  = $name;
+$contact->from_email = $email;
+$contact->subject    = '[mayi.com.au] ' . $subject;
+
+$contact->add_message($name,    'From');
+$contact->add_message($email,   'Email');
+$contact->add_message($message, 'Message', 10);
+
+echo $contact->send();

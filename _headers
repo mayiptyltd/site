@@ -1,0 +1,14 @@
+# HTTP Security Headers for Mayi Pty Ltd
+# Compatible with Netlify and Cloudflare Pages.
+# For GitHub Pages, these headers cannot be served — the meta tags
+# in index.html provide a partial equivalent for CSP and Referrer-Policy.
+# For Apache hosting, add equivalent directives to .htaccess.
+
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://www.google.com https://maps.google.com; connect-src 'self'
